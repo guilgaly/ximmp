@@ -16,7 +16,7 @@ net.virtualvoid.sbt.graph.Plugin.graphSettings
  */
 jfxSettings
 
-JFX.mainClass :=(Some(""))
+JFX.mainClass := Some("guilgaly.ximmp.gui.XimmpApp")
 
 JFX.nativeBundles := "all"
 
@@ -32,7 +32,7 @@ JFX.license := "GPL v3"
 
 JFX.appVersion := "0.0.1"
 
-JFX.appName := "MP3 Player"
+JFX.appName := "XIMMP"
 
 JFX.licenseFile := Some(baseDirectory.value / "LICENSE")
 

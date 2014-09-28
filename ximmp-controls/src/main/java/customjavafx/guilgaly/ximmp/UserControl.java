@@ -43,6 +43,8 @@ public abstract class UserControl extends Region {
         loader.setController(this);
         loader.setLocation(this.getViewURL());
 
+        System.out.println(loader.getLocation().toString());
+
         try {
             Node root = (Node) loader.load();
             setMaxSize(root);
