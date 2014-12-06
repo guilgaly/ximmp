@@ -1,69 +1,79 @@
 import sbt.Keys._
 
+// ################################################# PROJECT #################################################
 
-// #################### PROJECTS ####################
+name := "ximmp"
 
-// Aggregates all projects
-lazy val ximmp = ximmpProject("ximmp", file(".")).aggregate(ximmpGui, ximmpControls, ximmpCore)
+version := "0.0.1-SNAPSHOT"
 
-// Main GUI application
-lazy val ximmpGui = (
-  fxmlXimmpProject("ximmp-gui")
-  dependsOn(ximmpControls)
+scalaVersion := "2.11.4"
+
+libraryDependencies ++= Seq(
+  // ScalaFX
+  "org.scalafx" %% "scalafx" % "8.0.20-R6",
+  // ScalaFXML
+//  "org.scalafx" %% "scalafxml-core" % "0.2.2-SNAPSHOT",
+//  "org.scalafx" %% "scalafxml-subcut" % "0.2.2-SNAPSHOT",
+  // DI/IoC
+  "com.escalatesoft.subcut" %% "subcut" % "2.1",
+  // Logs
+  "org.log4s" %% "log4s" % "1.1.3",
+  "org.slf4j" % "slf4j-simple" % "1.7.7",
+  // Tests
+  "org.scalatest" %% "scalatest" % "2.2.2" % "test",
+  // Compiler plugins
+  compilerPlugin("com.escalatesoft.subcut" %% "subcut" % "2.1"),
+  compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
 )
 
-// Custom controls for ximmpGui - publish this to import in Scene Builder
-lazy val ximmpControls = (
-  scalafxXimmpProject("ximmp-controls")
-  dependsOn(ximmpCore)
-)
+fork := true
 
-// Core non-GUI functionnality
-lazy val ximmpCore = scalafxXimmpProject("ximmp-core")
+fork in Test := true
 
 
-// #################### UTILITY METHODS ####################
+// ######################################## SBT PLUGINS CONFIGURATION ########################################
 
-def ximmpProject(name: String, file: File): Project = (
-  Project(name, file)
-  settings(
-  	version := "0.0.1-SNAPSHOT",
-    organization := "guilgaly",
-    scalaVersion := "2.11.2",
-    // Set the prompt (for this build) to include the project id.
-    shellPrompt := { state => System.getProperty("user.name") + ":" + Project.extract(state).currentRef.project + "> " }
-  )
-)
+/* For dependency-tree, etc.
+ * Common tasks:
+ * - dependency-graph : Shows an ASCII graph of the project's dependencies on the sbt console
+ * - dependency-tree : Shows an ASCII tree representation of the project's dependencies
+ * - what-depends-on <organization> <module> <revision> : Find out what depends on an artifact.
+ *   Shows a reverse dependency tree for the selected module.
+ */
+net.virtualvoid.sbt.graph.Plugin.graphSettings
 
-def scalafxXimmpProject(name: String): Project = (
-  ximmpProject(name, file(name))
-  settings(
-    libraryDependencies ++= Seq(
-      // ScalaFX
-      "org.scalafx" %% "scalafx" % "8.0.5-R5",
-      // Logs
-      "org.log4s" %% "log4s" % "1.0.3",
-      "org.slf4j" % "slf4j-simple" % "1.7.7",
-      // Tests
-      "org.scalatest" %% "scalatest" % "2.2.1" % "test"
-    ),
-    // Run in separate VM, so there are no issues with double initialization of JavaFX
-    fork := true,
-    fork in Test := true
-  )
-)
+/*
+ * Native packaging with sbt-javafx: package with the package-javafx SBT task. Will create native packages for
+ * all supported platforms (depending on the platform used for building). Eg. on Mac OS X, will create a .app
+ * application, and will also package it in a .dmg disk image and a .pkg installer.
+ *
+ * Note: There are requirements for building various types of packages. Per Oracle's doc:
+ * - EXE: Windows, Inno Setup 5 or later
+ * - MSI: Windows, WiX 3.0 or later
+ * - APP/DMG/PKG: Mac OS X, Xcode (Xcode is not mentionned in Oracle's doc, but there's an error otherwise!)
+ * - RPM: Linux, RPMBuild
+ * - DEB: Linux, Debian packaging tools
+ */
+jfxSettings
 
-def fxmlXimmpProject(name: String): Project = (
-  scalafxXimmpProject(name)
-  settings(
-    libraryDependencies ++= Seq(
-      "org.scalafx" %% "scalafxml-core" % "0.2.2-SNAPSHOT",
-      "org.scalafx" %% "scalafxml-subcut" % "0.2.2-SNAPSHOT",
-      // DI/IoC
-      "com.escalatesoft.subcut" %% "subcut" % "2.1",
-      // Compiler plugins
-      compilerPlugin("com.escalatesoft.subcut" %% "subcut" % "2.1"),
-      compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
-    )
-  )
-)
+JFX.mainClass := Some("guilgaly.ximmp.gui.XimmpApp")
+
+JFX.nativeBundles := "all"
+
+JFX.vendor := "Guillaume Galy"
+
+JFX.title := "XIMMP"
+
+JFX.description := "XIMMP Is More than just a Music Player"
+
+JFX.copyright := "Guillaume Galy 2014"
+
+JFX.license := "GPL v3"
+
+JFX.appVersion := "0.0.1"
+
+JFX.appName := "XIMMP"
+
+JFX.licenseFile := Some(baseDirectory.value / "LICENSE")
+
+JFX.verbose := true
